@@ -10,11 +10,6 @@ public final class MyCollection<E> implements Collection<E> {
     private static final int INITSIZE = 10;
     private Object[] elementData = new Object[INITSIZE];
 
-    public MyCollection(final Object[] elementData) {
-        this.elementData = (Object[]) elementData.clone();
-        size = elementData.length;
-    }
-
     @Override
     public boolean add(final E e) {
         final double increaseSize = 1.5f;
@@ -62,6 +57,9 @@ public final class MyCollection<E> implements Collection<E> {
     @Override
     public <T> T[] toArray(final T[] a) {
         Object[] myArr = new Object[a.length];
+        if (a.length == 0) {
+            myArr = Arrays.copyOf(elementData, size);
+        }
         if (a.length == size) {
             myArr = Arrays.copyOf(elementData, size);
         }
@@ -69,6 +67,7 @@ public final class MyCollection<E> implements Collection<E> {
             myArr = Arrays.copyOf(elementData, a.length);
         }
         if (a.length > size) {
+            myArr = Arrays.copyOf(elementData, a.length);
             for (int i = 0; i < size; i++) {
                 myArr[i] = elementData[i];
             }
@@ -96,11 +95,11 @@ public final class MyCollection<E> implements Collection<E> {
     @Override
     public boolean containsAll(final Collection<?> c) {
         int containsCounter = 0;
-        boolean isContainsAll = false;
         for (Object e : c) {
             for (int i = 0; i < size; i++) {
                 if (Objects.equals(elementData[i], e)) {
                     containsCounter++;
+                    break;
                 }
             }
         }
@@ -132,7 +131,6 @@ public final class MyCollection<E> implements Collection<E> {
                     count++;
                 }
             }
-            System.out.println("count = " + count);
             while (count > 0) {
                 MyIterator iterator = new MyIterator();
                 for (int i = 0; i < size; i++) {
@@ -152,17 +150,18 @@ public final class MyCollection<E> implements Collection<E> {
 
     @Override
     public boolean retainAll(final Collection<?> c) {
+        if (c == null) {
+            throw new NullPointerException("Collection is null");
+        }
+        MyIterator iterator = new MyIterator();
         boolean isRetainAll = false;
-        MyCollection mycol = new MyCollection(elementData);
-        int newSize = size;
-        for (int i = 0; i < size; i++) {
-            if (!c.contains(elementData[i])) {
-                mycol.remove(elementData[i]);
+        while (iterator.hasNext()) {
+            if (!c.contains(iterator.next())) {
+                iterator.remove();
                 isRetainAll = true;
-                newSize--;
             }
         }
-        elementData = mycol.toArray();
+
         return isRetainAll;
     }
 
